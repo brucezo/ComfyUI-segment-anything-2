@@ -409,6 +409,7 @@ class Sam2Segmentation:
         if not keep_model_loaded:
             try:
                 model.to(offload_device)
+                model.reset_state(self.inference_state)
             except:
                 model.model.to(offload_device)
         
