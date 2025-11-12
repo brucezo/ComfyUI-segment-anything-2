@@ -182,7 +182,7 @@ class Sam2Segmentation:
             "required": {
                 "sam2_model": ("SAM2MODEL", ),
                 "image": ("IMAGE", ),
-                "keep_model_loaded": ("BOOLEAN", {"default": True}),
+                "keep_model_loaded": ("BOOLEAN", {"default": False}),
             },
             "optional": {
                 "coordinates_positive": ("STRING", {"forceInput": True}),
@@ -347,7 +347,7 @@ class Sam2Segmentation:
 
             elif segmentor == 'video':
                 mask_list = []
-                if hasattr(self, 'inference_state'):
+                if hasattr(self, 'inference_state') and self.inference_state is not None:
                     model.reset_state(self.inference_state)
                 self.inference_state = model.init_state(image.permute(0, 3, 1, 2).contiguous(), H, W, device=device)
                 if bboxes is None:
@@ -412,6 +412,10 @@ class Sam2Segmentation:
                 model.reset_state(self.inference_state)
             except:
                 model.model.to(offload_device)
+            if hasattr(self, 'inference_state') and self.inference_state is not None and hasattr(model, "reset_state"):
+                model.reset_state(self.inference_state)
+                self.inference_state = None
+            mm.soft_empty_cache()
         
         out_list = []
         for mask in mask_list:
